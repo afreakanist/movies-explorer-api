@@ -3,6 +3,9 @@ const CastError = require('../errors/CastError');
 const ForbiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
+const {
+  movieNotFoundMsg, movieForbiddenMsg, validationErrMsg, castErrMsg,
+} = require('../utils/errorMessages');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({})
@@ -31,7 +34,7 @@ module.exports.postMovie = (req, res, next) => {
     .then((movie) => res.status(200).send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Данные не прошли валидацию'));
+        next(new ValidationError(validationErrMsg));
       } else {
         next();
       }
@@ -44,16 +47,16 @@ module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        next(new NotFoundError('Карточка не найдена'));
+        next(new NotFoundError(movieNotFoundMsg));
       }
       if (movie.owner._id.toString() !== req.user._id) {
-        next(new ForbiddenError('Удалять можно только свои карточки с фильмами'));
+        next(new ForbiddenError(movieForbiddenMsg));
       } else {
         Movie.deleteOne({ _id: movieId })
           .then((m) => res.status(200).send({ message: `Карточка фильма ${movie.nameEN} (${movieId}) была удалена`, ...m }))
           .catch((err) => {
             if (err.name === 'CastError') {
-              next(new CastError('Неправильный запрос'));
+              next(new CastError(castErrMsg));
             } else {
               next();
             }
@@ -62,7 +65,7 @@ module.exports.deleteMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Неправильный запрос'));
+        next(new CastError(castErrMsg));
       } else {
         next();
       }

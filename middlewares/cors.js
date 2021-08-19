@@ -2,6 +2,8 @@ const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
 const allowedCors = [
   'http://localhost:3000',
   'https://localhost:3000',
+  'http://movieshmovie.nomoredomains.monster',
+  'https://movieshmovie.nomoredomains.monster',
 ];
 
 module.exports = (req, res, next) => {
