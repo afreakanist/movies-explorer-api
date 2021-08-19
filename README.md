@@ -12,3 +12,5 @@
 * Nodejs
 * Express
 * MongoDB
+
+`Адрес API`: api.movieshmovie.nomoredomains.monster
