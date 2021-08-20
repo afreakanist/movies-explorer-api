@@ -8,13 +8,12 @@ const cors = require('./middlewares/cors');
 const errorHandler = require('./middlewares/errors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const router = require('./routes/index');
-const { DB_PATH } = require('./utils/config');
 const limiter = require('./utils/rateLimiter');
+const { DATABASE, PORT } = require('./utils/config');
 
-const { PORT = 3001 } = process.env;
 const app = express();
 
-mongoose.connect(DB_PATH, {
+mongoose.connect(DATABASE, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,

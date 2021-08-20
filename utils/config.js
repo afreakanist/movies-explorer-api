@@ -1,2 +1,7 @@
-module.exports.DEV_JWT_SECRET = 'dev-secret-key';
-module.exports.DB_PATH = 'mongodb://localhost:27017/moviesdb';
+const {
+  DATABASE = 'mongodb://localhost:27017/moviesdb', JWT_SECRET = 'dev-secret-key', NODE_ENV, PORT = 3001,
+} = process.env;
+
+module.exports = {
+  DATABASE, JWT_SECRET, NODE_ENV, PORT,
+};

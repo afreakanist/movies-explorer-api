@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { DEV_JWT_SECRET } = require('../utils/config');
 const CastError = require('../errors/CastError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
@@ -11,7 +10,7 @@ const {
   userNotFoundMsg, userExistsConflictMsg, userUnauthorizedMsg, validationErrMsg, castErrMsg,
 } = require('../utils/errorMessages');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { JWT_SECRET } = require('../utils/config');
 
 module.exports.getMyUserInfo = (req, res, next) => {
   User.findById(req.user._id)
@@ -80,7 +79,7 @@ module.exports.login = (req, res, next) => {
         throw new UnauthorizedError(userUnauthorizedMsg);
       }
 
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : DEV_JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
 
       res.send({ token });
 
