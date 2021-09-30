@@ -7,7 +7,11 @@ const NotFoundError = require('../errors/NotFoundError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 const ValidationError = require('../errors/ValidationError');
 const {
-  userNotFoundMsg, userExistsConflictMsg, userUnauthorizedMsg, validationErrMsg, castErrMsg,
+  userNotFoundMsg,
+  userExistsConflictMsg,
+  userUnauthorizedMsg,
+  validationErrMsg,
+  castErrMsg,
 } = require('../utils/errorMessages');
 
 const { JWT_SECRET } = require('../utils/config');
@@ -16,7 +20,9 @@ module.exports.getMyUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (user) {
-        res.status(200).send({ name: user.name, email: user.email });
+        res
+          .status(200)
+          .send({ name: user.name, email: user.email, _id: req.user._id });
       }
       return next(new NotFoundError(userNotFoundMsg));
     })
@@ -32,13 +38,18 @@ module.exports.getMyUserInfo = (req, res, next) => {
 module.exports.updateProfile = (req, res, next) => {
   const { name, email } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, email },
+    { new: true, runValidators: true },
+  )
     .orFail(() => next(new NotFoundError(userNotFoundMsg)))
     .then((user) => res.status(200).send({ name: user.name, email: user.email }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError(validationErrMsg));
-      } if (err.name === 'CastError') {
+      }
+      if (err.name === 'CastError') {
         next(new CastError(castErrMsg));
       } else {
         next();
@@ -47,27 +58,30 @@ module.exports.updateProfile = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  const {
-    name, email, password,
-  } = req.body;
+  const { name, email, password } = req.body;
 
-  User.findOne({ email }).then((u) => {
-    if (u) {
-      throw new ConflictError(userExistsConflictMsg);
-    }
-    bcrypt.hash(password, 10)
-      .then((hash) => User.create({
-        name, email, password: hash,
-      }))
-      .then((user) => res.status(201).send({ _id: user._id, email: user.email }))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          next(new ValidationError(validationErrMsg));
-        } else {
-          next();
-        }
-      });
-  }).catch(next);
+  User.findOne({ email })
+    .then((u) => {
+      if (u) {
+        throw new ConflictError(userExistsConflictMsg);
+      }
+      bcrypt
+        .hash(password, 10)
+        .then((hash) => User.create({
+          name,
+          email,
+          password: hash,
+        }))
+        .then((user) => res.status(201).send({ _id: user._id, email: user.email }))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new ValidationError(validationErrMsg));
+          } else {
+            next();
+          }
+        });
+    })
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
@@ -79,7 +93,9 @@ module.exports.login = (req, res, next) => {
         throw new UnauthorizedError(userUnauthorizedMsg);
       }
 
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: '7d',
+      });
 
       res.send({ token });
 
